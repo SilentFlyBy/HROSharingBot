@@ -1,4 +1,7 @@
-﻿using System;
+﻿using HROSharingBot.Commands;
+using System;
+using Telegram.Bot;
+using Telegram.Bot.Args;
 
 namespace HROSharingBot
 {
@@ -6,7 +9,18 @@ namespace HROSharingBot
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            TelegramBot.Bot.OnMessage += OnMessageReceived;
+
+            TelegramBot.Bot.StartReceiving();
+
+            Console.ReadLine();
+
+            TelegramBot.Bot.StopReceiving();
+        }
+
+        private static void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            MessageProcessor.ProcessMessage(e.Message);
         }
     }
 }
