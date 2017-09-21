@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Telegram.Bot.Types;
 
 namespace HROSharingBot.Sessions
 {
     public abstract class Session
     {
-        public long ChatId { get; set; }
-
-
-        public Session() { }
-        public Session(long chatId)
+        protected Session()
         {
-            this.ChatId = chatId;
         }
+
+        public long ChatId { get; set; }
 
         public abstract Task ExecuteMessage(Message message);
     }

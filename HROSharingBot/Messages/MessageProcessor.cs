@@ -1,11 +1,8 @@
 ﻿using HROSharingBot.Commands;
 using HROSharingBot.Sessions;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Telegram.Bot.Types;
 
-namespace HROSharingBot
+namespace HROSharingBot.Messages
 {
     public static class MessageProcessor
     {
@@ -15,18 +12,14 @@ namespace HROSharingBot
                 return;
 
             if (SessionManager.SessionExists(message.Chat.Id))
-            {
                 ProcessMessageInSession(message, SessionManager.GetSession(message.Chat.Id));
-            }
             else
-            {
                 ProcessMessageStandAlone(message);
-            }
         }
 
         private static void ProcessMessageStandAlone(Message message)
         {
-            if (String.IsNullOrEmpty(message.Text))
+            if (string.IsNullOrEmpty(message.Text))
                 return;
 
             if (message.Chat.Title == "Filesharing")
@@ -38,13 +31,7 @@ namespace HROSharingBot
 
         private static void ProcessMessageInSession(Message message, Session session)
         {
-            if (CommandDispatcher.ParseCommand(message.Text) == CommandDispatcher.Command.Exit)
-            {
-                SessionManager.DestroySession(session);
-                return;
-            }
-
-            var executeTask = session.ExecuteMessage(message);
+            session.ExecuteMessage(message);
         }
     }
 }

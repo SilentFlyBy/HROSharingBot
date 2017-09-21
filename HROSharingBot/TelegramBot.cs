@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,7 +7,8 @@ namespace HROSharingBot
 {
     public static class TelegramBot
     {
-        public static readonly TelegramBotClient Bot = new TelegramBotClient("424327957:AAF68jiSHTF24a5Uv5EGtxZX57bretFTyTI");
+        public static readonly TelegramBotClient Bot =
+            new TelegramBotClient("424327957:AAF68jiSHTF24a5Uv5EGtxZX57bretFTyTI");
 
         public static async Task WriteMessage(long chatId, string text)
         {

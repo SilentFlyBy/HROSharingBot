@@ -1,32 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace HROSharingBot.Commands
 {
     public static class CommandDispatcher
     {
-        private static Dictionary<Command, Type> commandRunners;
+        public enum Command
+        {
+            Cat,
+            Start,
+            Exit,
+            Undefined
+        }
+
+        private static readonly Dictionary<Command, Type> CommandRunners;
 
 
         static CommandDispatcher()
         {
-            commandRunners = new Dictionary<Command, Type>();
-            commandRunners.Add(Command.Cat, typeof(CatCommandRunner));
-            commandRunners.Add(Command.Start, typeof(StartCommandRunner));
+            CommandRunners = new Dictionary<Command, Type>
+            {
+                {Command.Cat, typeof(CatCommandRunner)},
+                {Command.Start, typeof(StartCommandRunner)},
+                {Command.Exit, typeof(ExitCommandRunner)}
+            };
         }
 
-        public static void RunCommand(string command, long chatId)
+        public static async void RunCommand(string command, long chatId)
         {
             var commandResult = ParseCommand(command);
-            if(commandResult == Command.Undefined)
+            if (commandResult == Command.Undefined)
             {
-                var sendTask = TelegramBot.WriteMessage(chatId, "Diesen Befehl kenne ich nicht.");
+                await TelegramBot.WriteMessage(chatId, "Diesen Befehl kenne ich nicht.");
                 return;
             }
 
-            ICommandRunner runner = (ICommandRunner)Activator.CreateInstance(commandRunners[commandResult]);
-            var runTask = runner.Run(chatId);
+            var runner = (ICommandRunner) Activator.CreateInstance(CommandRunners[commandResult]);
+            await runner.Run(chatId);
         }
 
         public static Command ParseCommand(string message)
@@ -34,28 +44,10 @@ namespace HROSharingBot.Commands
             if (message == null)
                 return Command.Undefined;
 
-            if (message.StartsWith("/"))
-            {
-                var commandText = message.Substring(1);
-                Command commandResult;
+            if (!message.StartsWith("/")) return Command.Undefined;
+            var commandText = message.Substring(1);
 
-                if(Enum.TryParse(commandText, true, out commandResult))
-                {
-                    return commandResult;
-                }
-            }
-
-            return Command.Undefined;
-        }
-
-
-
-        public enum Command
-        {
-            Cat,
-            Start,
-            Exit,
-            Undefined
+            return Enum.TryParse(commandText, true, out Command commandResult) ? commandResult : Command.Undefined;
         }
     }
 }
