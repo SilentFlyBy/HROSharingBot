@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HROSharingBot.Commands;
 using HROSharingBot.Messages;
@@ -12,11 +13,26 @@ namespace HROSharingBot.Sessions
 {
     public class UploadFileSession : Session
     {
-        private const long GroupChatId = -217390667;
-
-
         private int _sessionStep;
         private readonly List<UploadStepDesciptor> _steps;
+        private readonly long _groupChatId = Convert.ToInt64(ConfigReader.Configuration["GroupChatId"]);
+        
+        private string Title { get; set; }
+        private string Description { get; set; }
+        private List<string> Platforms { get; set; } = new List<string>();
+        private string ImageLink { get; set; }
+        private List<string> FileId { get; set; } = new List<string>();
+        private UploadMediaType MediaType { get; set; }
+        
+        public UploadStepDesciptor CurrentStep
+        {
+            get
+            {
+                var step = (UploadFileSessionStep) _sessionStep;
+
+                return _steps.FirstOrDefault(s => s.Step == step);
+            }
+        }
 
         public UploadFileSession()
         {
@@ -153,26 +169,31 @@ namespace HROSharingBot.Sessions
                     Conditions = new MessageVerifier.MessageCondition(),
                     InvalidMessageErrorText = "",
                     Action = Finalize
+                },
+                new UploadStepDesciptor()
+                {
+                    Step = UploadFileSessionStep.MoreFiles,
+                    PromptText = "Möchtest du weitere Dateien hochladen?",
+                    Conditions = new MessageVerifier.MessageCondition()
+                    {
+                        Text = new MessageVerifier.TextCondition {EqualTo = new[] {"Ja", "Nein"}}
+                    },
+                    InvalidMessageErrorText = "Bitte gib 'Ja' oder 'Nein' ein.",
+                    Action = MoreFiles,
+                    Keyboard  = new ReplyKeyboardMarkup(new KeyboardButton[][]
+                    {
+                        new[]
+                        {
+                            new KeyboardButton("Ja"),
+                            new KeyboardButton("Nein"), 
+                        }
+                    })
                 }
             };
         }
-
-        public UploadStepDesciptor CurrentStep
-        {
-            get
-            {
-                var step = (UploadFileSessionStep) _sessionStep;
-
-                return _steps.FirstOrDefault(s => s.Step == step);
-            }
-        }
-
-        private string Title { get; set; }
-        private string Description { get; set; }
-        private List<string> Platforms { get; set; } = new List<string>();
-        private string ImageLink { get; set; }
-        private string FileId { get; set; }
-        private UploadMediaType MediaType { get; set; }
+        
+        
+        
 
         public override async Task ExecuteMessage(Message message)
         {
@@ -222,10 +243,17 @@ namespace HROSharingBot.Sessions
 
             text += "Bild: " + ImageLink;
 
+            long chatId;
+            chatId = _groupChatId == 0 ? this.ChatId : _groupChatId;
 
-            await TelegramBot.SendMessage(GroupChatId, text);
-            var file = new FileToSend(FileId);
-            await TelegramBot.Bot.SendDocumentAsync(GroupChatId, file);
+
+            await TelegramBot.SendMessage(chatId, text);
+            
+            foreach (var id in FileId)
+            {
+                var file = new FileToSend(id);
+                await TelegramBot.Bot.SendDocumentAsync(chatId, file);
+            }
         }
 
         private void NextStep()
@@ -246,7 +274,7 @@ namespace HROSharingBot.Sessions
         private void UploadFile(Message m)
         {
             if (m.Document.FileId != null)
-                FileId = m.Document.FileId;
+                FileId.Add(m.Document.FileId);
             _sessionStep++;
         }
 
@@ -258,7 +286,7 @@ namespace HROSharingBot.Sessions
         private async void MorePlatforms(Message m)
         {
             if (m.Text != "Ja") return;
-            _sessionStep = _sessionStep - 2;
+            _sessionStep -= 2;
             await TelegramBot.SendMessage(m.Chat.Id, CurrentStep.PromptText);
         }
 
@@ -285,6 +313,14 @@ namespace HROSharingBot.Sessions
             else if (FileId == null)
                 _sessionStep--;
         }
+        
+        private void MoreFiles(Message message)
+        {
+            if (message.Text == "Ja")
+            {
+                _sessionStep -= 3;
+            }
+        }
 
         
 
@@ -307,10 +343,11 @@ namespace HROSharingBot.Sessions
             MorePlatforms = 4,
             SetImage = 5,
             UploadFile = 6,
-            Finalize = 7
+            Finalize = 7,
+            MoreFiles = 8
         }
 
-        public enum UploadMediaType
+        private enum UploadMediaType
         {
             Software,
             Musik,

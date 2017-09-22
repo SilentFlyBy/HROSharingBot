@@ -10,21 +10,12 @@ namespace HROSharingBot
 {
     public static class TelegramBot
     {
-        public static IConfiguration Configuration { get; private set; }
         public static readonly TelegramBotClient Bot;
 
 
         static TelegramBot()
         {
-            var environment = Environment.GetEnvironmentVariable("APP_ENVIRONMENT");
-            var configfile = environment != null ? $"appsettings.{environment}.json" : "appsettings.json";
-            
-            var configBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(configfile);
-            
-            Configuration = configBuilder.Build();
-            Bot = new TelegramBotClient(Configuration["appSettings:BotToken"]);
+            Bot = new TelegramBotClient(ConfigReader.Configuration["appSettings:BotToken"]);
         }
 
         
