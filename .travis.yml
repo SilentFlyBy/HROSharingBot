@@ -16,3 +16,6 @@ script:
   - dotnet restore
   - dotnet build ./HROSharingBot
   - dotnet publish ./HROSharingBot -r linux-arm
+  
+after_success:
+  " sshpass -p $SSH_PASSWORD scp -r ./HROSharingBot/bin/Debug/netcoreapp2.0/linux-arm/* hrobot@moldtmann.de:/home/hrobot/"
