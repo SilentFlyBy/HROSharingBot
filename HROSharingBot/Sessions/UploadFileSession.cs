@@ -15,7 +15,7 @@ namespace HROSharingBot.Sessions
     {
         private int _sessionStep;
         private readonly List<UploadStepDesciptor> _steps;
-        private readonly long _groupChatId = Convert.ToInt64(ConfigReader.Configuration["GroupChatId"]);
+        private readonly long _groupChatId = Convert.ToInt64(ConfigReader.Configuration["appSettings:GroupChatId"]);
         
         private string Title { get; set; }
         private string Description { get; set; }
@@ -23,6 +23,7 @@ namespace HROSharingBot.Sessions
         private string ImageLink { get; set; }
         private List<string> FileId { get; set; } = new List<string>();
         private UploadMediaType MediaType { get; set; }
+        private string UploaderName { get; set; }
         
         public UploadStepDesciptor CurrentStep
         {
@@ -241,6 +242,10 @@ namespace HROSharingBot.Sessions
 
             text += "\n\n";
 
+            text += "Uploader: " + this.UploaderName;
+            
+            text += "\n\n";
+
             text += "Bild: " + ImageLink;
 
             long chatId;
@@ -269,6 +274,7 @@ namespace HROSharingBot.Sessions
         private void SetTitle(Message m)
         {
             Title = m.Text;
+            this.UploaderName = m.Chat.FirstName + " " + m.Chat.LastName;
         }
 
         private void UploadFile(Message m)
