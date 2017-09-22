@@ -17,7 +17,7 @@ namespace HROSharingBot.Commands
                 contentStream.CopyTo(ms);
                 ms.Position = 0;
 
-                await TelegramBot.WriteImageMessage(chatId, "", ms);
+                await TelegramBot.SendImageMessage(chatId, "", ms);
             }
         }
     }

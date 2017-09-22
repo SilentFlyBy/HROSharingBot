@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using HROSharingBot.Messages;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Telegram.Bot.Args;
 
 namespace HROSharingBot
@@ -11,22 +13,24 @@ namespace HROSharingBot
         
         private static void Main()
         {
+            //Set cancel key listener
             Console.CancelKeyPress += (sender, args) =>
             {
                 QuitEvent.Set();
                 args.Cancel = true;
             };
             
-            Console.WriteLine("Starting HRO Sharing Telegram Bot.");
+            Console.WriteLine("### HRO Sharing Telegram Bot ###");
             TelegramBot.Bot.OnMessage += OnMessageReceived;
 
             TelegramBot.Bot.StartReceiving();
             Console.WriteLine("Now listening for messages...");
 
+            //Wait for cancel key
             QuitEvent.WaitOne();
 
-            Console.WriteLine("Exiting.");
             TelegramBot.Bot.StopReceiving();
+            Console.WriteLine("Bye.");
         }
 
         private static async void OnMessageReceived(object sender, MessageEventArgs e)
@@ -37,7 +41,7 @@ namespace HROSharingBot
             }
             catch (Exception)
             {
-                await TelegramBot.WriteMessage(e.Message.Chat.Id, "Ein Fehler ist aufgetreten.");
+                await TelegramBot.SendMessage(e.Message.Chat.Id, "Ein Fehler ist aufgetreten.");
             }
         }
     }

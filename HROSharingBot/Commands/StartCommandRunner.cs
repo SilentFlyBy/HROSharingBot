@@ -8,7 +8,7 @@ namespace HROSharingBot.Commands
         public async Task Run(long chatId)
         {
             var session = SessionManager.CreateSession<UploadFileSession>(chatId);
-            await TelegramBot.WriteMessage(chatId, session.CurrentStep.PromptText);
+            await TelegramBot.SendMessage(chatId, session.CurrentStep.PromptText, session.CurrentStep.Keyboard);
         }
     }
 }

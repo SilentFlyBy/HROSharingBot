@@ -10,7 +10,7 @@ namespace HROSharingBot.Commands
             if (SessionManager.SessionExists(chatId))
             {
                 SessionManager.DestroySession(SessionManager.GetSession(chatId));
-                await TelegramBot.WriteMessage(chatId, "Abgebrochen");
+                await TelegramBot.SendMessage(chatId, "Abgebrochen");
             }
         }
     }

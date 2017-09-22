@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using HROSharingBot.Commands;
 using HROSharingBot.Messages;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.InlineKeyboardButtons;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace HROSharingBot.Sessions
@@ -21,6 +22,33 @@ namespace HROSharingBot.Sessions
         {
             _steps = new List<UploadStepDesciptor>
             {
+                new UploadStepDesciptor()
+                {
+                    Step = UploadFileSessionStep.SetMediaType,
+                    PromptText = "Was möchtest du hochladen?",
+                    Conditions = new MessageVerifier.MessageCondition()
+                    {
+                        Text = new MessageVerifier.TextCondition()
+                        {
+                            EqualTo = new[] {"Software", "Musik", "Video", "Andere"}
+                        }
+                    },
+                    InvalidMessageErrorText = "Bitte gib eins der folgenden Paketarten an: 'Software', 'Musik', 'Video', 'Andere'",
+                    Action = SetMediaType,
+                    Keyboard = new ReplyKeyboardMarkup(new KeyboardButton[][]
+                    {
+                        new[]
+                        {
+                            new KeyboardButton("Software"),
+                            new KeyboardButton("Musik"), 
+                        },
+                        new[]
+                        {
+                            new KeyboardButton("Video"),
+                            new KeyboardButton("Andere"), 
+                        }
+                    })
+                },
                 new UploadStepDesciptor
                 {
                     Step = UploadFileSessionStep.SetTitle,
@@ -55,8 +83,27 @@ namespace HROSharingBot.Sessions
                         }
                     },
                     InvalidMessageErrorText =
-                        "Bitte gib eine der folgenden Plattformen an: Windows, Linux, OSD, Android, IOS, Andere",
-                    Action = SetPlatform
+                        "Bitte gib eine der folgenden Plattformen an: Windows, Linux, OSX, Android, IOS, Andere",
+                    Action = SetPlatform,
+                    Keyboard = new ReplyKeyboardMarkup(new KeyboardButton[][]
+                    {
+                        new[]
+                        {
+                            new KeyboardButton("Windows"),
+                            new KeyboardButton("Linux"), 
+                        },
+                        new[]
+                        {
+                            new KeyboardButton("OSX"),
+                            new KeyboardButton("Android"), 
+                        },
+                        new[]
+                        {
+                            new KeyboardButton("IOS"),
+                            new KeyboardButton("Andere"),
+                        }
+                        
+                    })
                 },
                 new UploadStepDesciptor
                 {
@@ -67,7 +114,15 @@ namespace HROSharingBot.Sessions
                         Text = new MessageVerifier.TextCondition {EqualTo = new[] {"Ja", "Nein"}}
                     },
                     InvalidMessageErrorText = "Bitte gib 'Ja' oder 'Nein' ein.",
-                    Action = MorePlatforms
+                    Action = MorePlatforms,
+                    Keyboard  = new ReplyKeyboardMarkup(new KeyboardButton[][]
+                    {
+                        new[]
+                        {
+                            new KeyboardButton("Ja"),
+                            new KeyboardButton("Nein"), 
+                        }
+                    })
                 },
                 new UploadStepDesciptor
                 {
@@ -117,6 +172,7 @@ namespace HROSharingBot.Sessions
         private List<string> Platforms { get; set; } = new List<string>();
         private string ImageLink { get; set; }
         private string FileId { get; set; }
+        private UploadMediaType MediaType { get; set; }
 
         public override async Task ExecuteMessage(Message message)
         {
@@ -128,7 +184,7 @@ namespace HROSharingBot.Sessions
 
             if (!message.Verify(CurrentStep.Conditions))
             {
-                await TelegramBot.WriteMessage(ChatId, "Ungültige Eingabe. " + CurrentStep.InvalidMessageErrorText);
+                await TelegramBot.SendMessage(ChatId, "Ungültige Eingabe. " + CurrentStep.InvalidMessageErrorText);
                 return;
             }
 
@@ -143,7 +199,8 @@ namespace HROSharingBot.Sessions
 
             NextStep();
 
-            await TelegramBot.WriteMessage(ChatId, CurrentStep.PromptText);
+            
+            await TelegramBot.SendMessage(ChatId, CurrentStep.PromptText, CurrentStep.Keyboard);
         }
 
         private async Task MakeFileUploadMessageAsync()
@@ -166,7 +223,7 @@ namespace HROSharingBot.Sessions
             text += "Bild: " + ImageLink;
 
 
-            await TelegramBot.WriteMessage(GroupChatId, text);
+            await TelegramBot.SendMessage(GroupChatId, text);
             var file = new FileToSend(FileId);
             await TelegramBot.Bot.SendDocumentAsync(GroupChatId, file);
         }
@@ -174,6 +231,11 @@ namespace HROSharingBot.Sessions
         private void NextStep()
         {
             _sessionStep++;
+        }
+        
+        private void SetMediaType(Message m)
+        {
+            this.MediaType = (UploadMediaType)Enum.Parse(typeof(UploadMediaType), m.Text, true);
         }
 
         private void SetTitle(Message m)
@@ -197,7 +259,7 @@ namespace HROSharingBot.Sessions
         {
             if (m.Text != "Ja") return;
             _sessionStep = _sessionStep - 2;
-            await TelegramBot.WriteMessage(m.Chat.Id, CurrentStep.PromptText);
+            await TelegramBot.SendMessage(m.Chat.Id, CurrentStep.PromptText);
         }
 
         private void SetPlatform(Message m)
@@ -208,6 +270,9 @@ namespace HROSharingBot.Sessions
         private void SetDescription(Message m)
         {
             Description = m.Text;
+
+            if (this.MediaType != UploadMediaType.Software)
+                this._sessionStep += 2;
         }
 
         private void Finalize(Message m)
@@ -221,6 +286,8 @@ namespace HROSharingBot.Sessions
                 _sessionStep--;
         }
 
+        
+
         public class UploadStepDesciptor
         {
             public UploadFileSessionStep Step { get; set; }
@@ -233,20 +300,22 @@ namespace HROSharingBot.Sessions
         
         public enum UploadFileSessionStep
         {
-            SetTitle = 0,
-            SetDescription = 1,
-            SetPlatform = 2,
-            MorePlatforms = 3,
-            SetImage = 4,
-            UploadFile = 5,
-            Finalize = 6
+            SetMediaType = 0,
+            SetTitle = 1,
+            SetDescription = 2,
+            SetPlatform = 3,
+            MorePlatforms = 4,
+            SetImage = 5,
+            UploadFile = 6,
+            Finalize = 7
         }
 
         public enum UploadMediaType
         {
             Software,
-            Music,
-            Video
+            Musik,
+            Video,
+            Andere
         }
     }
 }
