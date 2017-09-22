@@ -2,6 +2,12 @@ language: csharp
 mono: none
 dotnet: 2.0.0
 dist: trusty
+sudo: true
+
+env:
+  global:
+    - secure: "6W0xiyEDDWNI6mbHNbhFuqjMlhMxof44Opfr8EYgINGnRg7WPM9e46HfqIYIQYdJSQTxAcR1gHXdWXpJm99MnExEH2+1t7qw+UMD0Cn8tWZp1A0wLpIIDMQ2NhHjuiUsEw/8RM0RL935C6+UB5e0GbR0I4APN7FDYy/hcsna7fe/fT8/euPi3GREL9EGge/kAh1YYBY60VIryUv9LZFRLS14uBqTxmOCtxAasSL8MQ2ZHRNOlmQHDtfJob8w2l2yIIb1ZdTaSVW8SydSjxdnjG/Z5wHMNWPOn+KYgpJtOeXwErRXG3iMCamAbfwiindWJAVEk6KuHL1T2ko03rtGMas7nxQiGwj5KH3T1AJlZ+OF3I77V1gkBQ7Dov7oVEB2440+QnksvPWg6IF3SMvavASMQJjK3obPlhs4GX1QbQ5YnYPkc6K4IVts8xJYlqOrEPbkub+zLkswP1GpsljUZjsi3ZaxLlrAXGlRZzScGxkwHjKQY46jrQlT8MN+keJ5uQ8cRKb7r8SqgME/lncopXF9Q25NeIPXpb6cq668vXtdbXyOqEFJHqOZMT/sFZv4xhzrYOqSNmFIRIVWAXi1FoTqIRjFtW157KCe/kwJ+iD2u6dalggZLgnlrrDOCuhcN2mMrVDbXhRHcjyxFltf9RjmA5wnrELLZjvD3PE5Bgc="
+    
 
 addons:
   apt:
@@ -18,4 +24,5 @@ script:
   - dotnet publish ./HROSharingBot -r linux-arm
   
 after_success:
-  " sshpass -p $SSH_PASSWORD scp -r ./HROSharingBot/bin/Debug/netcoreapp2.0/linux-arm/* hrobot@moldtmann.de:/home/hrobot/"
+  - ssh-keyscan moldtmann.de >> ~/.ssh/known_hosts
+  - sshpass -p $SSH_PASSWORD scp -r ./HROSharingBot/bin/Debug/netcoreapp2.0/linux-arm/ hrobot@moldtmann.de:/home/hrobot/"
