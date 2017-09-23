@@ -155,12 +155,6 @@ namespace HROSharingBot.Sessions
 
         public override async Task ExecuteMessage(Message message)
         {
-            if (CommandDispatcher.ParseCommand(message.Text) != CommandDispatcher.Command.Undefined)
-            {
-                await CommandDispatcher.RunCommand(message.Text, message.Chat.Id);
-                return;
-            }
-
             if (!message.Verify(CurrentStep.Conditions))
             {
                 await TelegramBot.SendMessage(ChatId, "Ungültige Eingabe. " + CurrentStep.InvalidMessageErrorText);

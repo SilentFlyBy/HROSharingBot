@@ -13,7 +13,7 @@ namespace HROSharingBot.Messages
                 return;
 
             if (SessionManager.SessionExists(message.Chat.Id))
-                ProcessMessageInSession(message, SessionManager.GetSession(message.Chat.Id));
+                await ProcessMessageInSession(message, SessionManager.GetSession(message.Chat.Id));
             else
                 await ProcessMessageStandAlone(message);
         }
@@ -29,9 +29,15 @@ namespace HROSharingBot.Messages
             await CommandDispatcher.RunCommand(message.Text, message.Chat.Id);
         }
 
-        private static void ProcessMessageInSession(Message message, Session session)
+        private static async Task ProcessMessageInSession(Message message, Session session)
         {
-            session.ExecuteMessage(message);
+            if (CommandDispatcher.ParseCommand(message.Text) != CommandDispatcher.Command.Undefined)
+            {
+                await CommandDispatcher.RunCommand(message.Text, message.Chat.Id);
+                return;
+            }
+            
+            await session.ExecuteMessage(message);
         }
     }
 }
