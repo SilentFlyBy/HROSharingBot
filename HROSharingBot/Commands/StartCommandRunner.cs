@@ -8,7 +8,6 @@ namespace HROSharingBot.Commands
     {
         public async Task Run(long chatId)
         {
-            throw new Exception("Test");
             var session = SessionManager.CreateSession<UploadFileSession>(chatId);
             if(session != null)
                 await TelegramBot.SendMessage(chatId, session.CurrentStep.PromptText, session.CurrentStep.Keyboard);
