@@ -24,7 +24,9 @@ namespace HROSharingBot.Sessions
         private List<string> FileId { get; set; } = new List<string>();
         private UploadMediaType MediaType { get; set; }
         private string UploaderName { get; set; }
-        
+
+        private long TargetChatId => _groupChatId == 0 ? this.ChatId : _groupChatId;
+
         public UploadStepDesciptor CurrentStep
         {
             get
@@ -52,21 +54,7 @@ namespace HROSharingBot.Sessions
                     },
                     InvalidMessageErrorText = "Bitte gib eins der folgenden Paketarten an: 'Software', 'Musik', 'Video', 'Andere'",
                     Action = SetMediaType,
-                    Keyboard = new ReplyKeyboardMarkup(new KeyboardButton[][]
-                    {
-                        new[]
-                        {
-                            new KeyboardButton("Software"),
-                            new KeyboardButton("Musik"), 
-                        },
-                        new[]
-                        {
-                            new KeyboardButton("Video"),
-                            new KeyboardButton("Andere"), 
-                        },
-                        
-                    },
-                    false, true)
+                    Keyboard = KeyboardCreator.CreateKeyboard("Software", "Musik", "Video", "Andere")
                 },
                 new UploadStepDesciptor
                 {
@@ -104,26 +92,7 @@ namespace HROSharingBot.Sessions
                     InvalidMessageErrorText =
                         "Bitte gib eine der folgenden Plattformen an: Windows, Linux, OSX, Android, IOS, Andere",
                     Action = SetPlatform,
-                    Keyboard = new ReplyKeyboardMarkup(new KeyboardButton[][]
-                    {
-                        new[]
-                        {
-                            new KeyboardButton("Windows"),
-                            new KeyboardButton("Linux"), 
-                        },
-                        new[]
-                        {
-                            new KeyboardButton("OSX"),
-                            new KeyboardButton("Android"), 
-                        },
-                        new[]
-                        {
-                            new KeyboardButton("IOS"),
-                            new KeyboardButton("Andere"),
-                        }
-                        
-                    },
-                        false, true)
+                    Keyboard = KeyboardCreator.CreateKeyboard("Windows", "Linux", "Android", "IOS", "OSX", "Andere")
                 },
                 new UploadStepDesciptor
                 {
@@ -135,15 +104,7 @@ namespace HROSharingBot.Sessions
                     },
                     InvalidMessageErrorText = "Bitte gib 'Ja' oder 'Nein' ein.",
                     Action = MorePlatforms,
-                    Keyboard  = new ReplyKeyboardMarkup(new KeyboardButton[][]
-                    {
-                        new[]
-                        {
-                            new KeyboardButton("Ja"),
-                            new KeyboardButton("Nein"), 
-                        }
-                    },
-                        false, true)
+                    Keyboard  = KeyboardCreator.CreateKeyboard("Ja", "Nein")
                 },
                 new UploadStepDesciptor
                 {
@@ -185,15 +146,7 @@ namespace HROSharingBot.Sessions
                     },
                     InvalidMessageErrorText = "Bitte gib 'Ja' oder 'Nein' ein.",
                     Action = MoreFiles,
-                    Keyboard  = new ReplyKeyboardMarkup(new KeyboardButton[][]
-                    {
-                        new[]
-                        {
-                            new KeyboardButton("Ja"),
-                            new KeyboardButton("Nein"), 
-                        }
-                    },
-                        false, true)
+                    Keyboard  = KeyboardCreator.CreateKeyboard("Ja", "Nein")
                 }
             };
         }
@@ -234,35 +187,27 @@ namespace HROSharingBot.Sessions
         {
             var text = "";
             text += "Titel: " + Title;
-
-
             text += "\n\n";
 
+            text += "Paketart: " + this.MediaType;
             text += "Beschreibung: " + Description;
 
-            text += "\n\n";
-
-            text += "Plattform: ";
-            text = Platforms.Aggregate(text, (current, p) => current + (p + " "));
-
-            text += "\n\n";
-
-            text += "Uploader: " + this.UploaderName;
+            if (this.Platforms.Count > 0)
+            {
+                text += "Plattform: ";
+                text = Platforms.Aggregate(text, (current, p) => current + (p + ", "));
+            }
             
+            text += "Uploader: " + this.UploaderName;
             text += "\n\n";
-
             text += "Bild: " + ImageLink;
 
-            long chatId;
-            chatId = _groupChatId == 0 ? this.ChatId : _groupChatId;
-
-
-            await TelegramBot.SendMessage(chatId, text);
+            await TelegramBot.SendMessage(TargetChatId, text);
             
             foreach (var id in FileId)
             {
                 var file = new FileToSend(id);
-                await TelegramBot.Bot.SendDocumentAsync(chatId, file);
+                await TelegramBot.Bot.SendDocumentAsync(TargetChatId, file);
             }
         }
 
@@ -278,6 +223,7 @@ namespace HROSharingBot.Sessions
 
         private void SetTitle(Message m)
         {
+            var p = TargetChatId;
             Title = m.Text;
             this.UploaderName = m.Chat.FirstName + " " + m.Chat.LastName;
         }
