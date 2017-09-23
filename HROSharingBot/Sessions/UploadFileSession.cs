@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using HROSharingBot.Commands;
 using HROSharingBot.Messages;
@@ -185,24 +186,28 @@ namespace HROSharingBot.Sessions
 
         private async Task MakeFileUploadMessageAsync()
         {
-            var text = "";
-            text += "Titel: " + Title;
-            text += "\n\n";
-
-            text += "Paketart: " + this.MediaType;
-            text += "Beschreibung: " + Description;
+            var sb = new StringBuilder();
+            sb.AppendLine("Titel: " + Title);
+            sb.AppendLine();
+            sb.AppendLine("Paketart: " + this.MediaType);
+            sb.AppendLine("Beschreibung: " + Description);
+            sb.AppendLine();
 
             if (this.Platforms.Count > 0)
             {
-                text += "Plattform: ";
-                text = Platforms.Aggregate(text, (current, p) => current + (p + ", "));
+                sb.Append("Plattform: ");
+                foreach (var platform in Platforms)
+                {
+                    sb.Append(platform + ", ");
+                }
             }
-            
-            text += "Uploader: " + this.UploaderName;
-            text += "\n\n";
-            text += "Bild: " + ImageLink;
 
-            await TelegramBot.SendMessage(TargetChatId, text);
+            sb.AppendLine();
+            sb.AppendLine("Uploader: " + this.UploaderName);
+            sb.AppendLine();
+            sb.AppendLine("Bild: " + ImageLink);
+
+            await TelegramBot.SendMessage(TargetChatId, sb.ToString());
 
             foreach (var id in FileId)
             {
@@ -244,7 +249,6 @@ namespace HROSharingBot.Sessions
         {
             if (m.Text != "Ja") return;
             _sessionStep -= 2;
-            await TelegramBot.SendMessage(m.Chat.Id, CurrentStep.PromptText);
         }
 
         private void SetPlatform(Message m)
