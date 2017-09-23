@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using HROSharingBot.Commands;
 using HROSharingBot.Messages;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.InlineKeyboardButtons;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace HROSharingBot.Sessions
@@ -20,13 +18,13 @@ namespace HROSharingBot.Sessions
         
         private string Title { get; set; }
         private string Description { get; set; }
-        private List<string> Platforms { get; set; } = new List<string>();
+        private List<string> Platforms { get; } = new List<string>();
         private string ImageLink { get; set; }
-        private List<string> FileId { get; set; } = new List<string>();
+        private List<string> FileId { get; } = new List<string>();
         private UploadMediaType MediaType { get; set; }
         private string UploaderName { get; set; }
 
-        private long TargetChatId => _groupChatId == 0 ? this.ChatId : _groupChatId;
+        private long TargetChatId => _groupChatId == 0 ? ChatId : _groupChatId;
 
         public UploadStepDesciptor CurrentStep
         {
@@ -42,18 +40,18 @@ namespace HROSharingBot.Sessions
         {
             _steps = new List<UploadStepDesciptor>
             {
-                new UploadStepDesciptor()
+                new UploadStepDesciptor
                 {
                     Step = UploadFileSessionStep.SetMediaType,
                     PromptText = "Was möchtest du hochladen?",
-                    Conditions = new MessageVerifier.MessageCondition()
+                    Conditions = new MessageVerifier.MessageCondition
                     {
-                        Text = new MessageVerifier.TextCondition()
+                        Text = new MessageVerifier.TextCondition
                         {
                             EqualTo = new[] {"Software", "Musik", "Video", "Andere"}
                         }
                     },
-                    InvalidMessageErrorText = "Bitte gib eins der folgenden Paketarten an: 'Software', 'Musik', 'Video', 'Andere'",
+                    InvalidMessageErrorText = "Bitte gib eine der folgenden Paketarten an: 'Software', 'Musik', 'Video', 'Andere'",
                     Action = SetMediaType,
                     Keyboard = KeyboardCreator.CreateKeyboard("Software", "Musik", "Video", "Andere")
                 },
@@ -137,11 +135,11 @@ namespace HROSharingBot.Sessions
                     InvalidMessageErrorText = "",
                     Action = Finalize
                 },
-                new UploadStepDesciptor()
+                new UploadStepDesciptor
                 {
                     Step = UploadFileSessionStep.MoreFiles,
                     PromptText = "Möchtest du weitere Dateien hochladen?",
-                    Conditions = new MessageVerifier.MessageCondition()
+                    Conditions = new MessageVerifier.MessageCondition
                     {
                         Text = new MessageVerifier.TextCondition {EqualTo = new[] {"Ja", "Nein"}}
                     },
@@ -159,7 +157,7 @@ namespace HROSharingBot.Sessions
         {
             if (CommandDispatcher.ParseCommand(message.Text) != CommandDispatcher.Command.Undefined)
             {
-                CommandDispatcher.RunCommand(message.Text, message.Chat.Id);
+                await CommandDispatcher.RunCommand(message.Text, message.Chat.Id);
                 return;
             }
 
@@ -189,11 +187,11 @@ namespace HROSharingBot.Sessions
             var sb = new StringBuilder();
             sb.AppendLine("Titel: " + Title);
             sb.AppendLine();
-            sb.AppendLine("Paketart: " + this.MediaType);
+            sb.AppendLine("Paketart: " + MediaType);
             sb.AppendLine("Beschreibung: " + Description);
             sb.AppendLine();
 
-            if (this.Platforms.Count > 0)
+            if (Platforms.Count > 0)
             {
                 sb.Append("Plattform: ");
                 foreach (var platform in Platforms)
@@ -203,7 +201,7 @@ namespace HROSharingBot.Sessions
             }
 
             sb.AppendLine();
-            sb.AppendLine("Uploader: " + this.UploaderName);
+            sb.AppendLine("Uploader: " + UploaderName);
             sb.AppendLine();
             sb.AppendLine("Bild: " + ImageLink);
 
@@ -223,14 +221,13 @@ namespace HROSharingBot.Sessions
         
         private void SetMediaType(Message m)
         {
-            this.MediaType = (UploadMediaType)Enum.Parse(typeof(UploadMediaType), m.Text, true);
+            MediaType = (UploadMediaType)Enum.Parse(typeof(UploadMediaType), m.Text, true);
         }
 
         private void SetTitle(Message m)
         {
-            var p = TargetChatId;
             Title = m.Text;
-            this.UploaderName = m.Chat.FirstName + " " + m.Chat.LastName;
+            UploaderName = m.Chat.FirstName + " " + m.Chat.LastName;
         }
 
         private void UploadFile(Message m)
@@ -245,7 +242,7 @@ namespace HROSharingBot.Sessions
             ImageLink = m.Text;
         }
 
-        private async void MorePlatforms(Message m)
+        private void MorePlatforms(Message m)
         {
             if (m.Text != "Ja") return;
             _sessionStep -= 2;
@@ -260,8 +257,8 @@ namespace HROSharingBot.Sessions
         {
             Description = m.Text;
 
-            if (this.MediaType != UploadMediaType.Software)
-                this._sessionStep += 2;
+            if (MediaType != UploadMediaType.Software)
+                _sessionStep += 2;
         }
 
         private void Finalize(Message m)

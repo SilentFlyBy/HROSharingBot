@@ -22,7 +22,7 @@ namespace HROSharingBot.Messages
                 if (!(string.IsNullOrEmpty(document?.FilePath) || document.FileSize == 0 || document.FileStream != null))
                     return false;
 
-            if (condition.Null.Value != false) return true;
+            if (condition.Null.Value) return true;
             return document != null && document.FileSize > 0;
         }
 
@@ -33,7 +33,7 @@ namespace HROSharingBot.Messages
                 if (photo.Count != 0)
                     return false;
 
-            if (condition.Null.Value != false) return true;
+            if (condition.Null.Value) return true;
             return photo != null && photo.Count > 0;
         }
 

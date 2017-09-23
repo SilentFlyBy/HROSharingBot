@@ -10,9 +10,7 @@ namespace HROSharingBot.Sessions
 
         public static T CreateSession<T>(long chatId) where T : Session, new()
         {
-            TryCreateSession(chatId, out T session);
-
-            return session;
+            return TryCreateSession(chatId, out T session) == false ? null : session;
         }
 
         private static bool TryCreateSession<T>(long chatId, out T session) where T : Session, new()
@@ -32,15 +30,15 @@ namespace HROSharingBot.Sessions
 
         public static void DestroySession(Session session)
         {
-            DestroySession(session.ChatId);
+            if (session != null)
+                Sessions.Remove(session);
         }
 
         private static void DestroySession(long chatId)
         {
             var session = Sessions.FirstOrDefault(s => s.ChatId == chatId);
 
-            if (session != null)
-                Sessions.Remove(session);
+            DestroySession(session);
         }
 
         public static bool SessionExists(long chatId)

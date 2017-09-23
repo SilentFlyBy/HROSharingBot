@@ -32,7 +32,7 @@ namespace HROSharingBot.Commands
             var commandResult = ParseCommand(command);
             if (commandResult == Command.Undefined)
             {
-                await TelegramBot.SendMessage(chatId, "Diesen Befehl kenne ich nicht.");
+                await TelegramBot.SendMessage(chatId, "Schreibe /start um mit dem Upload einer Datei zu beginnen.\n/cat für Katzencontent");
                 return;
             }
 

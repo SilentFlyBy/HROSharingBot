@@ -11,14 +11,14 @@ namespace HROSharingBot
         {
             if (values == null) return null;
 
-            var count = (double) values.Length / 2d;
+            var count = values.Length / 2d;
             var rowsCount = Math.Round(count, MidpointRounding.AwayFromZero);
 
             var buttonArray = new List<KeyboardButton[]>();
 
             for (var i = 0; i < rowsCount; i++)
             {
-                var button2Index = (i * 2) + 1;
+                var button2Index = i * 2 + 1;
                 var rowButtons = button2Index < values.Length ? new KeyboardButton[2] : new KeyboardButton[1];
                 rowButtons[0] = values[i*2];
                 

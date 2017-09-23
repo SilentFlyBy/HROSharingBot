@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading;
 using HROSharingBot.Messages;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
 using Telegram.Bot.Args;
 
 namespace HROSharingBot
