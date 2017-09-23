@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace HROSharingBot
 {
-    public static class ConfigReader
+    public class ConfigReader
     {
         public static IConfiguration Configuration { get; }
 

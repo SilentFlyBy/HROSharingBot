@@ -8,7 +8,7 @@ namespace HROSharingBot.Commands
     {
         public async Task Run(long chatId)
         {
-            var apiUrl = "http://thecatapi.com/api/images/get";
+            const string apiUrl = "http://thecatapi.com/api/images/get";
 
             using (var http = new HttpClient())
             using (var contentStream = await http.GetStreamAsync(apiUrl))

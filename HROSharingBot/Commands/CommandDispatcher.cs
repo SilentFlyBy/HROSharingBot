@@ -41,10 +41,9 @@ namespace HROSharingBot.Commands
 
         public static Command ParseCommand(string message)
         {
-            if (message == null)
+            if (message == null || !message.StartsWith("/"))
                 return Command.Undefined;
 
-            if (!message.StartsWith("/")) return Command.Undefined;
             var commandText = message.Substring(1);
 
             return Enum.TryParse(commandText, true, out Command commandResult) ? commandResult : Command.Undefined;

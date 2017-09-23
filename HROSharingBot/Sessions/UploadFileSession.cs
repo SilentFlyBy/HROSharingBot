@@ -63,8 +63,10 @@ namespace HROSharingBot.Sessions
                         {
                             new KeyboardButton("Video"),
                             new KeyboardButton("Andere"), 
-                        }
-                    })
+                        },
+                        
+                    },
+                    false, true)
                 },
                 new UploadStepDesciptor
                 {
@@ -120,7 +122,8 @@ namespace HROSharingBot.Sessions
                             new KeyboardButton("Andere"),
                         }
                         
-                    })
+                    },
+                        false, true)
                 },
                 new UploadStepDesciptor
                 {
@@ -139,7 +142,8 @@ namespace HROSharingBot.Sessions
                             new KeyboardButton("Ja"),
                             new KeyboardButton("Nein"), 
                         }
-                    })
+                    },
+                        false, true)
                 },
                 new UploadStepDesciptor
                 {
@@ -188,7 +192,8 @@ namespace HROSharingBot.Sessions
                             new KeyboardButton("Ja"),
                             new KeyboardButton("Nein"), 
                         }
-                    })
+                    },
+                        false, true)
                 }
             };
         }
