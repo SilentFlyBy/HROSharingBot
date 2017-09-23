@@ -21,15 +21,15 @@ namespace HROSharingBot
             };
             
             Console.WriteLine("### HRO Sharing Telegram Bot ###");
-            TelegramBot.Bot.OnMessage += OnMessageReceived;
+            TelegramBot.OnMessage += OnMessageReceived;
 
-            TelegramBot.Bot.StartReceiving();
+            TelegramBot.StartReceiving();
             Console.WriteLine("Now listening for messages...");
 
             //Wait for cancel key
             QuitEvent.WaitOne();
 
-            TelegramBot.Bot.StopReceiving();
+            TelegramBot.StopReceiving();
             Console.WriteLine("Bye.");
         }
 
@@ -37,11 +37,21 @@ namespace HROSharingBot
         {
             try
             {
-                MessageProcessor.ProcessMessage(e.Message);
+                await MessageProcessor.ProcessMessage(e.Message);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                await TelegramBot.SendMessage(e.Message.Chat.Id, "Ein Fehler ist aufgetreten.");
+                await TelegramBot.SendMessage(e.Message.Chat.Id, "Ein Fehler ist aufgetreten. Der Entwickler wurde benachrichtigt.");
+
+                var developerChat = Convert.ToInt64(ConfigReader.Configuration["appSettings:DeveloperChat"]);
+                if (developerChat != 0)
+                {
+                    await TelegramBot.SendMessage(developerChat, ex.ToString());
+                }
+                else
+                {
+                    await TelegramBot.SendMessage(e.Message.Chat.Id, ex.ToString());
+                }
             }
         }
     }

@@ -203,11 +203,11 @@ namespace HROSharingBot.Sessions
             text += "Bild: " + ImageLink;
 
             await TelegramBot.SendMessage(TargetChatId, text);
-            
+
             foreach (var id in FileId)
             {
                 var file = new FileToSend(id);
-                await TelegramBot.Bot.SendDocumentAsync(TargetChatId, file);
+                await TelegramBot.SendFileMessage(TargetChatId, "", file);
             }
         }
 

@@ -1,21 +1,38 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Microsoft.Extensions.Configuration;
+using Telegram.Bot.Args;
 
 namespace HROSharingBot
 {
     public static class TelegramBot
     {
-        public static readonly TelegramBotClient Bot;
+        private static readonly TelegramBotClient Bot;
+        public static event EventHandler<MessageEventArgs> OnMessage;
 
 
         static TelegramBot()
         {
             Bot = new TelegramBotClient(ConfigReader.Configuration["appSettings:BotToken"]);
+            Bot.OnMessage += (e, args) =>
+            {
+                OnMessage?.Invoke(e, args);
+            };
+        }
+
+        public static void StartReceiving()
+        {
+            Bot.StartReceiving();
+        }
+
+        public static void StopReceiving()
+        {
+            Bot.StopReceiving();
         }
 
         
@@ -41,7 +58,12 @@ namespace HROSharingBot
         public static async Task SendFileMessage(long chatId, string text, Stream file)
         {
             var sendFile = new FileToSend("Datei", file);
-            await Bot.SendDocumentAsync(chatId, sendFile, text);
+            await SendFileMessage(chatId, text, sendFile);
+        }
+
+        public static async Task SendFileMessage(long chatId, string text, FileToSend file)
+        {
+            await Bot.SendDocumentAsync(chatId, file, text);
         }
 
         public static async Task ForwardMessage(long fromChatId, long toChatId, int messageId)

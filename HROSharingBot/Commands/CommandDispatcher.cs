@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace HROSharingBot.Commands
 {
@@ -26,7 +27,7 @@ namespace HROSharingBot.Commands
             };
         }
 
-        public static async void RunCommand(string command, long chatId)
+        public static async Task RunCommand(string command, long chatId)
         {
             var commandResult = ParseCommand(command);
             if (commandResult == Command.Undefined)

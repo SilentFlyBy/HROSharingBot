@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using HROSharingBot.Sessions;
 
 namespace HROSharingBot.Commands
@@ -7,8 +8,10 @@ namespace HROSharingBot.Commands
     {
         public async Task Run(long chatId)
         {
+            throw new Exception("Test");
             var session = SessionManager.CreateSession<UploadFileSession>(chatId);
-            await TelegramBot.SendMessage(chatId, session.CurrentStep.PromptText, session.CurrentStep.Keyboard);
+            if(session != null)
+                await TelegramBot.SendMessage(chatId, session.CurrentStep.PromptText, session.CurrentStep.Keyboard);
         }
     }
 }
