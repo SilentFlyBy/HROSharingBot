@@ -2,6 +2,7 @@
 using HROSharingBot.Commands;
 using HROSharingBot.Sessions;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace HROSharingBot.Messages
 {
@@ -23,7 +24,7 @@ namespace HROSharingBot.Messages
             if (string.IsNullOrEmpty(message.Text))
                 return;
 
-            if (message.Chat.Title == "Filesharing")
+            if (message.Chat.Type == ChatType.Group || message.Chat.Type == ChatType.Supergroup)
                 return;
 
             await CommandDispatcher.RunCommand(message.Text, message.Chat.Id);
