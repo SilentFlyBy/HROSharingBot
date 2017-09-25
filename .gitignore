@@ -261,4 +261,6 @@ __pycache__/
 *.pyc
 
 
-appsettings.*
+appsettings.Debug.json
+appsettings.Release.json
+appsettings.json
